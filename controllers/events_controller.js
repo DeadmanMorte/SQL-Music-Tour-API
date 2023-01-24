@@ -17,10 +17,29 @@ events.get('/', async(req, res) => {
     }
 })
 
-events.get('/:id', async(req, res) => {
+events.get('/:name', async(req, res) => {
     try {
         const foundEvent = await Event.findOne({
-        where: { event_id: req.params.id }
+        where: { name: req.params.id },
+        include: [{
+            model:MeetGreet, 
+            as: "meet_greets",
+            include: {model: Band, as: "bands", 
+            where: {name: {[Op.like]: `%${req.query.name ? req.query.name : ''}%`}}}
+            },
+            {
+                model: SetTime, 
+                as: "set_times", 
+                include: {model: Band, as: "bands",
+                where: {name: {[Op.like]: `%${req.query.name ? req.query.name : ''}%`}}}
+            },
+            { 
+                model: Stage, 
+                as: "stages", 
+                include: {model: Band, as: "bands",
+                where: {name: {[Op.like]: `%${req.query.name ? req.query.name : ''}%`}}}
+            },
+    ]
     })
         res.status(200).json(foundEvent)
     } catch (error) {
@@ -40,11 +59,11 @@ events.post('/', async(req, res) => {
     }
 })
 
-events.put('/:id', async(req, res) => {
+events.put('/:name', async(req, res) => {
     try {
         const updatedEvents = await Event.update(req.body, {
             where: {
-                event_id: req.params.id
+                name: req.params.id
             }
         })
         res.status(200).json({
@@ -56,11 +75,11 @@ events.put('/:id', async(req, res) => {
     }
 })
 
-events.delete('/:id', async(req, res) => {
+events.delete('/:name', async(req, res) => {
     try {
         const deletedEvents = await Event.destroy({
             where: {
-                event_id: req.params.id
+                name: req.params.id
             }
         })
         res.status(200).json({
